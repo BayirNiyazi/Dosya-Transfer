@@ -1,4 +1,4 @@
-console.log("ULTRA VERSION CALISIYOR");
+console.log("SON VERSION CALISIYOR");
 
 const express = require("express");
 const fileUpload = require("express-fileupload");
@@ -88,7 +88,6 @@ app.get("/", (req, res) => {
         background: lime;
       }
 
-      /* 🔥 GRID */
       .grid {
         width: 95%;
         max-width: 900px;
@@ -107,8 +106,9 @@ app.get("/", (req, res) => {
 
       .card img, .card video {
         width: 100%;
-        height: 120px;
-        object-fit: cover;
+        height: 140px;
+        object-fit: contain;
+        background: black;
       }
 
       .delete-btn {
@@ -124,7 +124,6 @@ app.get("/", (req, res) => {
         cursor: pointer;
       }
 
-      /* 🔥 VIEWER */
       .viewer {
         position: fixed;
         top:0;
@@ -132,14 +131,19 @@ app.get("/", (req, res) => {
         width:100%;
         height:100%;
         background: rgba(0,0,0,0.9);
-        display:none;
-        justify-content:center;
-        align-items:center;
-      }
+
+         display: none;
+
+         justify-content: center;
+         align-items: center;
+        }
 
       .viewer img, .viewer video {
-        max-width:90%;
-        max-height:90%;
+        width: auto;
+        height: auto;
+        max-width: 90vw;
+        max-height: 85vh;
+        object-fit: contain;
       }
     </style>
   </head>
@@ -151,8 +155,10 @@ app.get("/", (req, res) => {
 
       <label class="custom-file">
         Dosya Seç
-        <input type="file" id="file" multiple>
+        <input type="file" id="file" multiple onchange="updateLabel()">
       </label>
+
+      <div id="fileCount">Dosya seçilmedi</div>
 
       <button onclick="upload()">Gönder</button>
 
@@ -160,7 +166,7 @@ app.get("/", (req, res) => {
         <div class="bar" id="b"></div>
       </div>
 
-      <img src="/qr" width="120">
+      <img src="/qr" width="120" style="margin-top:20px;">
       <p style="font-size:12px;">${url}</p>
     </div>
 
@@ -171,6 +177,17 @@ app.get("/", (req, res) => {
     </div>
 
     <script>
+      function updateLabel() {
+        const files = document.getElementById("file").files;
+        const text = document.getElementById("fileCount");
+
+        if (files.length === 0) {
+          text.innerText = "Dosya seçilmedi";
+        } else {
+          text.innerText = files.length + " dosya seçildi";
+        }
+      }
+
       function upload() {
         const files = document.getElementById("file").files;
         if (!files.length) return alert("Dosya seç");
@@ -284,15 +301,11 @@ app.post("/upload", (req, res) => {
 app.get("/files", (req, res) => {
   if (!fs.existsSync("./uploads")) return res.json([]);
 
-  const files = fs.readdirSync("./uploads").map(name => {
-    const stats = fs.statSync("./uploads/" + name);
-    return {
-      name,
-      size: stats.size,
-      type: name.match(/(jpg|jpeg|png|gif)$/i) ? "image" :
-            name.match(/(mp4|mov)$/i) ? "video" : "other"
-    };
-  });
+  const files = fs.readdirSync("./uploads").map(name => ({
+    name,
+    type: name.match(/(jpg|jpeg|png|gif)$/i) ? "image" :
+          name.match(/(mp4|mov)$/i) ? "video" : "other"
+  }));
 
   res.json(files);
 });
